@@ -7,10 +7,11 @@ from solders.pubkey import Pubkey
 from solders.instruction import Instruction
 from solders.transaction import Transaction
 from solders.transaction_metadata import FailedTransactionMetadata
+from analyze import program_addresses
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 def main():
     results={}; payer=Keypair.from_seed(bytes(range(32))); rng=random.Random(10424)
-    for name,address in json.loads((ROOT/'repro/programs.json').read_text()).items():
+    for name,address in program_addresses().items():
         svm=LiteSVM().with_transaction_history(0); svm.airdrop(payer.pubkey(),10**10)
         program=Pubkey.from_string(address); svm.add_program_from_file(program,ROOT/f'evidence/original/{name}/deployed.so')
         tests=[('empty',b''),('short',b'\x01'*7),('unknown',b'\xff'*8)]

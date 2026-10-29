@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare a separately built artifact, including allocation padding; never copies code."""
 import argparse,hashlib,json,pathlib,sys
-from analyze import elf_layout
+from analyze import elf_layout, program_names
 
 def digest(b): return hashlib.sha256(b).hexdigest()
 def compare(original,candidate):
@@ -11,7 +11,7 @@ def compare(original,candidate):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('program'); ap.add_argument('candidate',type=pathlib.Path); ap.add_argument('--pad-zero-to-allocation',action='store_true'); ap.add_argument('--output',type=pathlib.Path,required=True); args=ap.parse_args()
     root=pathlib.Path(__file__).resolve().parents[1]
-    if args.program not in json.loads((root/'repro/programs.json').read_text()): ap.error('unknown program')
+    if args.program not in program_names(): ap.error('unknown program')
     original=(root/f'evidence/original/{args.program}/deployed.so').read_bytes(); candidate=args.candidate.read_bytes()
     if args.output.exists(): ap.error('output already exists')
     before=digest(candidate)

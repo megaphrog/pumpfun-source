@@ -3,7 +3,7 @@
 This produces addresses for manual recovery, never compiler inputs or rebuilt code.
 """
 import hashlib,json,pathlib,re,struct
-from analyze import elf_layout
+from analyze import elf_layout, program_names
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 def recover(name):
  b=(ROOT/f'evidence/original/{name}/deployed.so').read_bytes(); layout=elf_layout(b)
@@ -37,6 +37,6 @@ def recover(name):
   result[n]={'discriminator':d.hex(),'matches':hits}
  return {'binary_sha256':hashlib.sha256(b).hexdigest(),'basis':'official IDL' if idl.exists() else 'SHA256(global:snake_case(instruction log name)) hypothesis','instructions':result}
 if __name__=='__main__':
- out={n:recover(n) for n in json.loads((ROOT/'repro/programs.json').read_text())}
+ out={n:recover(n) for n in program_names()}
  (ROOT/'evidence/dispatch-map.json').write_text(json.dumps(out,indent=2)+'\n')
  for name,r in out.items(): print(name,sum(bool(i['matches']) for i in r['instructions'].values()),'/',len(r['instructions']))

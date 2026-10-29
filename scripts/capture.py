@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only finalized RPC capture. Refuses replacing existing evidence."""
 import argparse, base64, datetime, hashlib, json, pathlib, struct, time, urllib.request
+from analyze import program_addresses
 ALPHABET='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 def b58(data):
     n=int.from_bytes(data,'big'); s=''
@@ -49,4 +50,4 @@ def capture(url,name,key,out):
     (out/'capture.json').write_text(json.dumps(report,indent=2)+'\n'); print(name,slot,len(payload),sha(payload),flush=True)
 if __name__=='__main__':
     ap=argparse.ArgumentParser(); ap.add_argument('--rpc',default='https://api.mainnet-beta.solana.com'); ap.add_argument('--output',default='evidence/original'); args=ap.parse_args()
-    for name,key in json.loads(pathlib.Path('repro/programs.json').read_text()).items(): capture(args.rpc,name,key,pathlib.Path(args.output)/name)
+    for name,key in program_addresses().items(): capture(args.rpc,name,key,pathlib.Path(args.output)/name)

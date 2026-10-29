@@ -13,6 +13,8 @@ from pathlib import Path
 import struct
 import subprocess
 
+from analyze import program_names
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -117,7 +119,7 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     inputs = [(name, ROOT / 'evidence/original' / name / 'deployed.so')
-              for name in json.loads((ROOT / 'repro/programs.json').read_text())]
+              for name in program_names()]
     inputs += [(p.parent.name, p) for p in sorted((ROOT / 'evidence/dependencies').glob('*/deployed.so'))]
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(inventory, tool, name, path, output) for name, path in inputs]

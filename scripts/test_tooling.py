@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Mutation tests ensuring the byte comparator cannot hide code/padding changes."""
+import json
 import struct
 import unittest
 from types import SimpleNamespace
@@ -64,6 +65,18 @@ class InstructionLogNameTests(unittest.TestCase):
             analyze.program_names(),
             ['pump', 'pump_amm', 'pump_fees', 'mayhem'],
         )
+
+    def test_program_addresses_fall_back_to_captures(self):
+        addresses = analyze.program_addresses()
+        self.assertEqual(list(addresses), analyze.program_names())
+        self.assertEqual(
+            addresses['mayhem'], 'MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e'
+        )
+        # Captures must agree with the published IDL addresses where present.
+        for name, address in addresses.items():
+            idl = analyze.ROOT / 'evidence/upstream' / f'{name}.json'
+            if idl.is_file():
+                self.assertEqual(json.loads(idl.read_text())['address'], address)
 
     def test_mayhem_fallback_is_unchanged(self):
         names = self.names('mayhem')
